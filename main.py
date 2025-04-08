@@ -20,10 +20,42 @@ def MED(S, T):
 
 
 def fast_MED(S, T, MED={}):
-    # TODO -  implement top-down memoization
-    pass
+    if (S, T) in MED:
+        return MED[(S, T)]
+
+    if not S:
+        MED[(S, T)] = len(T)
+    elif not T:
+        MED[(S, T)] = len(S)
+    elif S[0] == T[0]:
+        MED[(S, T)] = fast_MED(S[1:], T[1:], MED)
+    else:
+        MED[(S, T)] = 1 + min(fast_MED(S, T[1:], MED), fast_MED(S[1:], T, MED), fast_MED(S[1:], T[1:], MED))
+
+    return MED[(S, T)]
+
 
 def fast_align_MED(S, T, MED={}):
-    # TODO - keep track of alignment
-    pass
+    if (S, T) in MED:
+        return MED[(S, T)]
 
+    if not S:
+        MED[(S, T)] = (len(T), '-' * len(T), T)
+    elif not T:
+        MED[(S, T)] = (len(S), S, '-' * len(S))
+    elif S[0] == T[0]:
+        distance, aligned_S, aligned_T = fast_align_MED(S[1:], T[1:], MED)
+        MED[(S, T)] = (distance, S[0] + aligned_S, T[0] + aligned_T)
+    else:
+        insert_distance, insert_aligned_S, insert_aligned_T = fast_align_MED(S, T[1:], MED)
+        delete_distance, delete_aligned_S, delete_aligned_T = fast_align_MED(S[1:], T, MED)
+        replace_distance, replace_aligned_S, replace_aligned_T = fast_align_MED(S[1:], T[1:], MED)
+
+        if insert_distance <= delete_distance and insert_distance <= replace_distance:
+            MED[(S, T)] = (1 + insert_distance, insert_aligned_S, T[0] + insert_aligned_T)
+        elif delete_distance <= insert_distance and delete_distance <= replace_distance:
+            MED[(S, T)] = (1 + delete_distance, S[0] + delete_aligned_S, delete_aligned_T)
+        else:
+            MED[(S, T)] = (1 + replace_distance, S[0] + replace_aligned_S, T[0] + replace_aligned_T)
+
+    return MED[(S, T)]
