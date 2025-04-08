@@ -8,21 +8,21 @@ alignments = [('b--ook', 'bac--k'), ('kook-ab-urr-a', 'kooky-bi-r-d-'), ('relev-
 
 def MED(S, T):
 # TO DO - modify to account for insertions, deletions and substitutions
-if (S == ""):
-return(len(T))
-elif (T == ""):
-return(len(S))
-else:
-if (S[0] == T[0]):
-return(MED(S[1:], T[1:]))
-else:
-return(1 + min(MED(S, T[1:]), MED(S[1:], T)))
+    if (S == ""):
+        return(len(T))
+    elif (T == ""):
+        return(len(S))
+    else:
+        if (S[0] == T[0]):
+            return(MED(S[1:], T[1:]))
+        else:
+            return(1 + min(MED(S, T[1:]), MED(S[1:], T)))
 
 
 def fast_MED(S, T, MED={}):
-# TODO - implement top-down memoization
-pass
+    # TODO - implement top-down memoization
+    pass
 
 def fast_align_MED(S, T, MED={}):
-# TODO - keep track of alignment
-pass
+    # TODO - keep track of alignment
+    pass
