@@ -21,6 +21,7 @@ This means that at each step, you’re grabbing the biggest piece you can withou
 1b)
 Greedy Choice Property
 At each step, choosing the largest coin ≤ N is always part of some optimal solution.
+
 Proof:
 Assume, for contradiction, that an optimal solution does not include the largest coin 2^i ≤ N. 
 Then all the coins used must be smaller than 2^i, i.e. from (2^0, ..., 2^(i-1))
@@ -30,6 +31,7 @@ better to take the largest available coin.
 
 Optimal Substructure
 The problem of making change for N − 2^i is a subproblem of making change for N, and solving it optimally leads to an optimal solution for N.
+
 Proof: If we optimally solve the subproblem N − 2^i, and we already took 2^i, then together we get an optimal solution for N There’s no advantage to rearranging the coins because the denominations are powers of 2 and uniquely sum to any number in binary form. 
 Thus, the greedy algorithm always gives the minimal number of coins.
 
@@ -39,6 +41,7 @@ Work:
 The total work is proportional to the number of 1s in the binary representation of N, since each 1 represents a coin.
 Converting N to binary takes O(log N) time, and counting the 1s also takes O(log N) time.
 So overall work = O(log N).
+
 Span:
 If done sequentially (e.g., subtracting coins one by one), the span is O(log N).
 But if we just want the number of coins (i.e., number of 1s in binary), we can do this in parallel with O(1) span.
@@ -58,3 +61,14 @@ But the optimal solution is:
 So greedy gives 3 coins, but optimal is 2 coins. This shows that greedy does not always produce the minimum.
 
 
+2b)
+Optimal Substructure Property: If the optimal solution for amount N uses a coin of denomination d, then the remaining amount N - d must also have an optimal solution.
+
+Proof:
+Suppose we have an optimal solution for amount N:
+Let it use coins: d1, d2, ..., dk
+Let’s assume d1 = d
+Then the rest of the coins {d2, ..., dk} must sum to N - d.
+If the way we make change for N - d wasn't optimal, then we could replace that part with a better one (fewer coins), and the total for N would be better — contradicting the assumption that we had an optimal solution for N.
+
+So, any optimal solution to N contains within it optimal solutions to its subproblems.
