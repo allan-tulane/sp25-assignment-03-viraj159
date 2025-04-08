@@ -4,29 +4,31 @@ from collections import Counter
 ####### Problem 3 #######
 
 test_cases = [('book', 'back'), ('kookaburra', 'kookybird'), ('elephant', 'relevant'), ('AAAGAATTCA', 'AAATCA')]
-alignments = [('b--ook', 'bac--k'), ('kook-ab-urr-a', 'kooky-bi-r-d-'), ('relev--ant','-ele-phant'), ('AAAGAATTCA', 'AAA---T-CA')]
+alignments = [('b--ook', 'bac--k'), ('kook-ab-urr-a', 'kooky-bi-r-d-'), ('relev--ant', '-ele-phant'),
+              ('AAAGAATTCA', 'AAA---T-CA')]
+
 
 def MED(S, T):
-# TO DO - modify to account for insertions, deletions and substitutions
+    # TO DO - modify to account for insertions, deletions and substitutions
     if (S == ""):
-        return(len(T))
+        return (len(T))
     elif (T == ""):
-        return(len(S))
+        return (len(S))
     else:
         if (S[0] == T[0]):
-            return(MED(S[1:], T[1:]))
+            return (MED(S[1:], T[1:]))
         else:
-            return(1 + min(MED(S, T[1:]), MED(S[1:], T)))
+            return (1 + min(MED(S, T[1:]), MED(S[1:], T)))
 
 
 def fast_MED(S, T, MED={}):
-    # Create a key
+    # Create key
     key = (S, T)
-    
+
     # Return result
     if key in MED:
         return MED[key]
-    
+
     # Base cases
     if S == "":
         MED[key] = len(T)
@@ -34,34 +36,31 @@ def fast_MED(S, T, MED={}):
     elif T == "":
         MED[key] = len(S)
         return MED[key]
-    
-    # If first characters match, no operation needed for them
+
     if S[0] == T[0]:
         result = fast_MED(S[1:], T[1:], MED)
-    
     else:
-        # insertion, deletion, substitution
-        deletion = 1 + fast_MED(S[1:], T, MED)  
-        insertion = 1 + fast_MED(S, T[1:], MED)  
-        substitution = 1 + fast_MED(S[1:], T[1:], MED)
-        
-        # Take the minimum of the three
-        result = min(deletion, insertion, substitution)
-    
+        deletion = 1 + fast_MED(S[1:], T, MED)  # Delete from S
+        insertion = 1 + fast_MED(S, T[1:], MED)  # Insert into S
+
+        # Take the minimum
+        result = min(deletion, insertion)
+
     # return the result
     MED[key] = result
     return result
-    
+
+
 def fast_align_MED(S, T, MED={}):
     if not MED:
         OPS = {}
-        
+
         def calculate_MED(S, T):
             key = (S, T)
-            
+
             if key in MED:
                 return MED[key]
-            
+
             # Base cases
             if S == "":
                 MED[key] = len(T)
@@ -71,105 +70,89 @@ def fast_align_MED(S, T, MED={}):
                 MED[key] = len(S)
                 OPS[key] = ('D',) * len(S)  # All deletions
                 return MED[key]
-            
-            # If first characters match
+
             if S[0] == T[0]:
                 result = calculate_MED(S[1:], T[1:])
                 MED[key] = result
                 OPS[key] = ('M',) + OPS[(S[1:], T[1:])]  # M for match
             else:
-                # Calculate costs
                 del_cost = 1 + calculate_MED(S[1:], T)
                 ins_cost = 1 + calculate_MED(S, T[1:])
-                sub_cost = 1 + calculate_MED(S[1:], T[1:])
-                
+
                 # Find minimum cost
-                min_cost = min(del_cost, ins_cost, sub_cost)
+                min_cost = min(del_cost, ins_cost)
                 MED[key] = min_cost
-                
-                # Store the operation used
+
+                # Store operation used
                 if min_cost == del_cost:
                     OPS[key] = ('D',) + OPS[(S[1:], T)]  # D for deletion
-                elif min_cost == ins_cost:
+                else:  # insertion
                     OPS[key] = ('I',) + OPS[(S, T[1:])]  # I for insertion
-                else:  # substitution
-                    OPS[key] = ('S',) + OPS[(S[1:], T[1:])]  # S for substitution
-            
+
             return MED[key]
-        
+
         calculate_MED(S, T)
-    else:
-        OPS = {}
-        
-        def reconstruct_ops(S, T):
+
+        #  construct the alignment strings
+        i, j = 0, 0
+        align_S = ""
+        align_T = ""
+
+        def build_alignment(S, T, i, j):
             key = (S, T)
-            
+
+            # Base cases
             if S == "":
-                OPS[key] = ('I',) * len(T)
-                return
+                return "-" * len(T), T
             elif T == "":
-                OPS[key] = ('D',) * len(S)
-                return
-            
+                return S, "-" * len(S)
+
+            if key not in OPS:
+                return "", ""
+
+            if OPS[key][0] == 'M':  # Match
+                s_rest, t_rest = build_alignment(S[1:], T[1:], i + 1, j + 1)
+                return S[0] + s_rest, T[0] + t_rest
+            elif OPS[key][0] == 'D':  # Deletion
+                s_rest, t_rest = build_alignment(S[1:], T, i + 1, j)
+                return S[0] + s_rest, "-" + t_rest
+            else:  # Insertion
+                s_rest, t_rest = build_alignment(S, T[1:], i, j + 1)
+                return "-" + s_rest, T[0] + t_rest
+
+        align_S, align_T = build_alignment(S, T, 0, 0)
+        return align_S, align_T
+    else:
+
+        def reconstruct_alignment(S, T):
+            if S == "":
+                return "-" * len(T), T
+            if T == "":
+                return S, "-" * len(S)
+
             if S[0] == T[0]:
-                if (S[1:], T[1:]) not in OPS:
-                    reconstruct_ops(S[1:], T[1:])
-                OPS[key] = ('M',) + OPS[(S[1:], T[1:])]
+                rest_S, rest_T = reconstruct_alignment(S[1:], T[1:])
+                return S[0] + rest_S, T[0] + rest_T
             else:
-                # Check which gives minimal cost
-                del_key = (S[1:], T)
-                ins_key = (S, T[1:])
-                sub_key = (S[1:], T[1:])
-                
-                if del_key not in OPS:
-                    reconstruct_ops(S[1:], T)
-                if ins_key not in OPS:
-                    reconstruct_ops(S, T[1:])
-                if sub_key not in OPS:
-                    reconstruct_ops(S[1:], T[1:])
-                
-                del_cost = 1 + MED[del_key] if del_key in MED else float('inf')
-                ins_cost = 1 + MED[ins_key] if ins_key in MED else float('inf')
-                sub_cost = 1 + MED[sub_key] if sub_key in MED else float('inf')
-                
-                min_cost = min(del_cost, ins_cost, sub_cost)
-                
-                if min_cost == del_cost:
-                    OPS[key] = ('D',) + OPS[del_key]
-                elif min_cost == ins_cost:
-                    OPS[key] = ('I',) + OPS[ins_key]
+                delete_key = (S[1:], T)
+                insert_key = (S, T[1:])
+
+                if delete_key not in MED:
+                    fast_MED(S[1:], T, MED)
+                if insert_key not in MED:
+                    fast_MED(S, T[1:], MED)
+
+                delete_dist = MED.get(delete_key, float('inf'))
+                insert_dist = MED.get(insert_key, float('inf'))
+
+                if 1 + delete_dist <= 1 + insert_dist:
+                    # Deletion is optimal
+                    rest_S, rest_T = reconstruct_alignment(S[1:], T)
+                    return S[0] + rest_S, "-" + rest_T
                 else:
-                    OPS[key] = ('S',) + OPS[sub_key]
-        
-        if (S, T) not in OPS:
-            reconstruct_ops(S, T)
-    
-    # construct the alignment strings based on operations
-    align_S = ""
-    align_T = ""
-    
-    # Get operations for the full strings
-    ops = OPS[(S, T)]
-    i, j = 0, 0
-    
-    for op in ops:
-        if op == 'M':  # Match
-            align_S += S[i]
-            align_T += T[j]
-            i += 1
-            j += 1
-        elif op == 'D':  # Deletion from S
-            align_S += S[i]
-            align_T += '-'
-            i += 1
-        elif op == 'I':  # Insertion into S
-            align_S += '-'
-            align_T += T[j]
-            j += 1
-        elif op == 'S':  # Substitution
-            align_S += S[i]
-            align_T += T[j]
-            i += 1
-            j += 1
-    
-    return (align_S, align_T)
+                    # Insertion is optimal
+                    rest_S, rest_T = reconstruct_alignment(S, T[1:])
+                    return "-" + rest_S, T[0] + rest_T
+
+        # Get the alignment
+        return reconstruct_alignment(S, T)
