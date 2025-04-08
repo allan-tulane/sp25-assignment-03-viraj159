@@ -23,10 +23,10 @@ Greedy Choice Property
 At each step, choosing the largest coin ≤ N is always part of some optimal solution.
 
 Proof:
-Assume, for contradiction, that an optimal solution does not include the largest coin 2^i ≤ N. 
-Then all the coins used must be smaller than 2^i, i.e. from (2^0, ..., 2^(i-1))
-But the sum of any number of such coins can only produce multiples of 2^i − 1 at most: Max sum of m coins = m ⋅ 2^(i−1)
-So you would need at least 2 or more such coins to match or exceed 2^i, contradicting the goal of using fewer coins. Hence, it’s always
+- Assume, for contradiction, that an optimal solution does not include the largest coin 2^i ≤ N. 
+- Then all the coins used must be smaller than 2^i, i.e. from (2^0, ..., 2^(i-1))
+- But the sum of any number of such coins can only produce multiples of 2^i − 1 at most: Max sum of m coins = m ⋅ 2^(i−1)
+- So you would need at least 2 or more such coins to match or exceed 2^i, contradicting the goal of using fewer coins. Hence, it’s always
 better to take the largest available coin.
 
 Optimal Substructure
@@ -66,9 +66,29 @@ Optimal Substructure Property: If the optimal solution for amount N uses a coin 
 
 Proof:
 Suppose we have an optimal solution for amount N:
-Let it use coins: d1, d2, ..., dk
-Let’s assume d1 = d
-Then the rest of the coins {d2, ..., dk} must sum to N - d.
-If the way we make change for N - d wasn't optimal, then we could replace that part with a better one (fewer coins), and the total for N would be better — contradicting the assumption that we had an optimal solution for N.
+- Let it use coins: d1, d2, ..., dk
+- Let’s assume d1 = d
+- Then the rest of the coins {d2, ..., dk} must sum to N - d.
+- If the way we make change for N - d wasn't optimal, then we could replace that part with a better one (fewer coins), and the total for N would be better, contradicting the assumption that we had an optimal solution for N.
 
 So, any optimal solution to N contains within it optimal solutions to its subproblems.
+
+2c)
+Let dp[x] = minimum number of coins to make amount x
+- dp[0] = 0 (0 coins to make amount 0)
+- dp[1..N] = infinity (or some large number)
+
+Then for each amount x from 1 to N:
+
+for x in range(1, N + 1):
+    for coin in D:
+        if x - coin >= 0:
+            dp[x] = min(dp[x], dp[x - coin] + 1)
+
+Work:
+- We fill dp[1...N], and for each amount we try all k coin types.
+- So total work = O(N * k)
+
+Span (Parallel):
+- If using parallelism per amount (e.g., try all k coins in parallel), the inner loop has O(log k) span (using a parallel min operation).
+- Overall parallel span = O(N * log k)
