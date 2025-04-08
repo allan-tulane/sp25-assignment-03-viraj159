@@ -17,6 +17,7 @@ To make change for N dollars using the fewest number of coins (with denomination
 This works because powers of 2 allow you to build up any number using a unique combination of these coins, like how binary numbers work.
 This means that at each step, you’re grabbing the biggest piece you can without going over the remaining amount.
 
+
 1b)
 Greedy Choice Property
 At each step, choosing the largest coin ≤ N is always part of some optimal solution.
@@ -32,6 +33,7 @@ The problem of making change for N − 2^i is a subproblem of making change for 
 Proof: If we optimally solve the subproblem N − 2^i, and we already took 2^i, then together we get an optimal solution for N There’s no advantage to rearranging the coins because the denominations are powers of 2 and uniquely sum to any number in binary form. 
 Thus, the greedy algorithm always gives the minimal number of coins.
 
+
 1c)
 Work:
 The total work is proportional to the number of 1s in the binary representation of N, since each 1 represents a coin.
@@ -40,4 +42,19 @@ So overall work = O(log N).
 Span:
 If done sequentially (e.g., subtracting coins one by one), the span is O(log N).
 But if we just want the number of coins (i.e., number of 1s in binary), we can do this in parallel with O(1) span.
+
+
+2a)
+Let’s say the coin denominations are: D = [1, 3, 4]. You want to make N = 6.
+Greedy approach (take largest coin ≤ N at each step):
+- Take 4 -> remaining = 2
+- Take 1 -> remaining = 1
+- Take 1 -> remaining = 0
+Total coins = 3 (4 + 1 + 1)
+
+But the optimal solution is:
+3 + 3 = 6 -> uses 2 coins
+
+So greedy gives 3 coins, but optimal is 2 coins. This shows that greedy does not always produce the minimum.
+
 
